@@ -13,10 +13,4 @@ class LaravelUtilsServiceProvider extends ServiceProvider
     {
         //
     }
-
-    #[\Override]
-    public function boot(): void
-    {
-        //
-    }
 }
