@@ -24,10 +24,10 @@ it('returns array of value => name', function (): void {
 });
 
 it('builds an In validation rule from values', function (): void {
-    $rule = Status::validationRule();
+    $in = Status::validationRule();
 
-    expect($rule)->toBeInstanceOf(In::class);
-    expect((string) $rule)->toContain('active', 'pending_review', 'archived');
+    expect($in)->toBeInstanceOf(In::class);
+    expect((string) $in)->toContain('active', 'pending_review', 'archived');
 });
 
 it('iterates all cases keyed by name', function (): void {
