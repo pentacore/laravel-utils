@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 use Illuminate\Validation\Rules\In;
-use Pentacore\LaravelUtils\Tests\Fixtures\Priority;
-use Pentacore\LaravelUtils\Tests\Fixtures\Status;
+use Workbench\App\Concerns\Direction;
+use Workbench\App\Concerns\Priority;
+use Workbench\App\Concerns\Status;
 
 it('returns case names', function (): void {
     expect(Status::names())->toBe(['Active', 'Pending_Review', 'Archived']);
@@ -91,4 +92,65 @@ it('compares values with equals()', function (): void {
     expect(Status::Active->equals('archived'))->toBeFalse();
     expect(Priority::High->equals(3))->toBeTrue();
     expect(Priority::High->equals('3'))->toBeFalse();
+});
+
+describe('pure (non-backed) enums', function (): void {
+    it('returns case names', function (): void {
+        expect(Direction::names())->toBe(['North', 'South', 'East', 'West', 'North_East']);
+    });
+
+    it('falls back to case names for values()', function (): void {
+        expect(Direction::values())->toBe(['North', 'South', 'East', 'West', 'North_East']);
+    });
+
+    it('builds a name => name map for array()', function (): void {
+        expect(Direction::array())->toBe([
+            'North' => 'North',
+            'South' => 'South',
+            'East' => 'East',
+            'West' => 'West',
+            'North_East' => 'North_East',
+        ]);
+    });
+
+    it('builds an In validation rule from case names', function (): void {
+        $rule = Direction::validationRule();
+
+        expect($rule)->toBeInstanceOf(In::class);
+        expect((string) $rule)->toContain('North', 'South', 'North_East');
+    });
+
+    it('iterates all cases keyed by name', function (): void {
+        $items = iterator_to_array(Direction::iterator());
+
+        expect($items)->toHaveKeys(['North', 'South', 'East', 'West', 'North_East']);
+        expect($items['North'])->toBe(Direction::North);
+    });
+
+    it('slugifies the case name', function (): void {
+        expect(Direction::North_East->asSlug())->toBe('north-east');
+        expect(Direction::North_East->asSlug('_'))->toBe('north_east');
+    });
+
+    it('builds a select map using case names as values', function (): void {
+        $map = Direction::mapForSelect();
+
+        expect($map)->toHaveCount(5);
+        expect($map[0])->toBe(['name' => 'East', 'value' => 'East']);
+        expect(array_column($map, 'name'))->toBe(['East', 'North', 'North East', 'South', 'West']);
+    });
+
+    it('returns comma-separated case names', function (): void {
+        expect(Direction::commaSeparatedValues())->toBe('North,South,East,West,North_East');
+    });
+
+    it('casts the case to its name', function (): void {
+        expect(Direction::North->toString())->toBe('North');
+        expect(Direction::North_East->toString())->toBe('North_East');
+    });
+
+    it('compares against the case name with equals()', function (): void {
+        expect(Direction::North->equals('North'))->toBeTrue();
+        expect(Direction::North->equals('South'))->toBeFalse();
+    });
 });

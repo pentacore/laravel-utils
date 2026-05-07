@@ -1,0 +1,12 @@
+providers:
+    - Pentacore\LaravelUtils\LaravelUtilsServiceProvider
+
+workbench:
+    start: '/'
+    install: true
+    discovers:
+        web: false
+        api: false
+        commands: false
+        components: false
+        views: false

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Pentacore\LaravelUtils\Tests\Fixtures;
+namespace Workbench\App\Concerns;
 
 use Pentacore\LaravelUtils\Concerns\EnumUtils;
 
