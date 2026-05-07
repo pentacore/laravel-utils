@@ -1,3 +1,9 @@
+## [1.0.3](https://github.com/pentacore/laravel-utils/compare/v1.0.2...v1.0.3) (2026-05-07)
+
+### Bug Fixes
+
+* boost guidelines ([a3f5ca4](https://github.com/pentacore/laravel-utils/commit/a3f5ca454aa03bdb19c1631b8c56b3793168b091))
+
 ## [1.0.2](https://github.com/pentacore/laravel-utils/compare/v1.0.1...v1.0.2) (2026-05-07)
 
 ### Bug Fixes
