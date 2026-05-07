@@ -1,3 +1,9 @@
+## [1.0.2](https://github.com/pentacore/laravel-utils/compare/v1.0.1...v1.0.2) (2026-05-07)
+
+### Bug Fixes
+
+* publish laravel/boost guidelines ([47afcd7](https://github.com/pentacore/laravel-utils/commit/47afcd793065244f99439e6e86a33b207a812ae0))
+
 ## [1.0.1](https://github.com/pentacore/laravel-utils/compare/v1.0.0...v1.0.1) (2026-05-07)
 
 ### Bug Fixes
