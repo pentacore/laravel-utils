@@ -8,11 +8,13 @@ use Illuminate\Support\ServiceProvider;
 
 class LaravelUtilsServiceProvider extends ServiceProvider
 {
+    #[\Override]
     public function register(): void
     {
         //
     }
 
+    #[\Override]
     public function boot(): void
     {
         //
