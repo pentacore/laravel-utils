@@ -4,7 +4,7 @@ A collection of commonly used Laravel utilities, traits, and helpers.
 
 ## Requirements
 
-- PHP `^8.5`
+- PHP `^8.3`
 - Laravel `^11.0 || ^12.0`
 
 ## Installation

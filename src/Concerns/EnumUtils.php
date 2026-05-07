@@ -62,9 +62,9 @@ trait EnumUtils
     /**
      * Converts the enum value to a URL-friendly slug.
      */
-    public function asSlug($separator = '-', $language = 'en', $dictionary = ['@' => 'at']): string
+    public function asSlug(string $separator = '-', string $language = 'en', array $dictionary = ['@' => 'at']): string
     {
-        return new Stringable($this->value)->slug($separator, $language, $dictionary)->toString();
+        return (new Stringable((string) $this->value))->slug($separator, $language, $dictionary)->toString();
     }
 
     /**
@@ -81,12 +81,14 @@ trait EnumUtils
         }
 
         $values = array_map(
-            static fn ($case): array => [
-                $labelKey => method_exists($case, 'label') ? $case->label() : $case->name
-                        |> (static fn ($str): string|array => str_replace('_', ' ', $str))
-                        |> ucwords(...),
-                'value' => $case->value,
-            ],
+            static function ($case) use ($labelKey): array {
+                $label = method_exists($case, 'label') ? $case->label() : $case->name;
+
+                return [
+                    $labelKey => ucwords(str_replace('_', ' ', $label)),
+                    'value' => $case->value,
+                ];
+            },
             self::cases()
         );
 
