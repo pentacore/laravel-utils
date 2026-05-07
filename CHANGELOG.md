@@ -1,3 +1,9 @@
+## [1.0.1](https://github.com/pentacore/laravel-utils/compare/v1.0.0...v1.0.1) (2026-05-07)
+
+### Bug Fixes
+
+* publish requires token ([83b553b](https://github.com/pentacore/laravel-utils/commit/83b553b48b689ca67c67cff11b18517170223439))
+
 ## 1.0.0 (2026-05-07)
 
 ### Features
