@@ -86,14 +86,6 @@ jobs:
           path: pest-P${{ matrix.php }}-L${{ env.LARAVEL_SLUG }}.junit.xml
           if-no-files-found: warn
 
-      - name: Upload generated .d.ts
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: generated-dts-P${{ matrix.php }}-L${{ env.LARAVEL_SLUG }}
-          path: workbench/resources/js/typefinder/**
-          if-no-files-found: error
-
       - name: Upload coverage to Codecov
         if: matrix.coverage
         uses: codecov/codecov-action@v6
@@ -195,71 +187,6 @@ jobs:
           fail_level: error
           level: error
 
-  vite-plugin:
-    runs-on: ubuntu-latest
-    name: Vite plugin
-
-    steps:
-      - uses: actions/checkout@v6
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.4'
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
-          coverage: none
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
-      - name: Cache composer packages
-        uses: actions/cache@v5
-        with:
-          path: ${{ steps.composer-cache.outputs.dir }}
-          key: composer-vite-P8.4-L12-${{ hashFiles('composer.json') }}
-          restore-keys: |
-            composer-vite-P8.4-L12-
-            composer-vite-P8.4-
-      - name: Install PHP dependencies
-        run: |
-          composer require "laravel/framework:12.*" "orchestra/testbench:*" --no-update --no-interaction
-          composer update --prefer-dist --no-interaction --no-progress
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: package-lock.json
-      - name: Install JS dependencies
-        working-directory: packages/vite-plugin-laravel-typefinder
-        run: npm install
-      - name: Lint
-        working-directory: packages/vite-plugin-laravel-typefinder
-        run: npm run lint
-      - name: Tests with coverage
-        working-directory: packages/vite-plugin-laravel-typefinder
-        run: npx vitest run --coverage --reporter=junit --outputFile=test-report.junit.xml
-      - name: Build
-        working-directory: packages/vite-plugin-laravel-typefinder
-        env:
-          CODECOV_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-        run: npm run build
-      - name: Upload vite-plugin dist
-        uses: actions/upload-artifact@v7
-        with:
-          name: vite-plugin-dist
-          path: packages/vite-plugin-laravel-typefinder/dist
-          if-no-files-found: error
-      - name: Upload JS coverage to Codecov
-        uses: codecov/codecov-action@v6
-        with:
-          files: packages/vite-plugin-laravel-typefinder/coverage/lcov.info
-          flags: js
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-      - name: Upload test results to Codecov
-        if: ${{ !cancelled() }}
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-
   dependency-review:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
@@ -289,7 +216,7 @@ jobs:
           configFile: .commitlintrc.json
 
   test-summary:
-    needs: [php, vite-plugin]
+    needs: [php]
     if: always()
     runs-on: ubuntu-latest
     name: Test summary
