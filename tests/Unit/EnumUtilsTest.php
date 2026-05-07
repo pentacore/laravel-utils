@@ -114,10 +114,10 @@ describe('pure (non-backed) enums', function (): void {
     });
 
     it('builds an In validation rule from case names', function (): void {
-        $rule = Direction::validationRule();
+        $in = Direction::validationRule();
 
-        expect($rule)->toBeInstanceOf(In::class);
-        expect((string) $rule)->toContain('North', 'South', 'North_East');
+        expect($in)->toBeInstanceOf(In::class);
+        expect((string) $in)->toContain('North', 'South', 'North_East');
     });
 
     it('iterates all cases keyed by name', function (): void {

@@ -16,9 +16,9 @@ trait EnumUtils
     /**
      * Resolves a case to its backing value, or its name when the enum is pure.
      */
-    private static function resolveValue(UnitEnum $case): int|string
+    private static function resolveValue(UnitEnum $unitEnum): int|string
     {
-        return $case instanceof BackedEnum ? $case->value : $case->name;
+        return $unitEnum instanceof BackedEnum ? $unitEnum->value : $unitEnum->name;
     }
 
     /**
