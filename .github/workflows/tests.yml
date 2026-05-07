@@ -1,0 +1,240 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, development]
+  pull_request:
+    branches: [main, master, development]
+
+concurrency:
+  group: tests-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.3', '8.4', '8.5']
+        laravel: ['11.*', '12.*', '13.*']
+        exclude:
+          # Laravel 11 requires PHP 8.4-
+          - php: '8.5'
+            laravel: '11.*'
+        include:
+          - php: '8.5'
+            laravel: '13.*'
+            coverage: true
+
+    name: P${{ matrix.php }} L${{ matrix.laravel }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Compute matrix slug
+        env:
+          LARAVEL_VERSION: ${{ matrix.laravel }}
+        run: echo "LARAVEL_SLUG=${LARAVEL_VERSION%%.*}" >> "$GITHUB_ENV"
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache composer packages
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-P${{ matrix.php }}-L${{ env.LARAVEL_SLUG }}-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-P${{ matrix.php }}-L${{ env.LARAVEL_SLUG }}-
+            composer-P${{ matrix.php }}-
+
+      - name: Install dependencies
+        env:
+          LARAVEL_VERSION: ${{ matrix.laravel }}
+        run: |
+          composer require "laravel/framework:${LARAVEL_VERSION}" "orchestra/testbench:*" --no-update --no-interaction
+          composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run tests
+        env:
+          COVERAGE: ${{ matrix.coverage }}
+        run: |
+          if [ "$COVERAGE" = "true" ]; then
+            vendor/bin/pest --log-junit "pest-P${{ matrix.php }}-L${LARAVEL_SLUG}.junit.xml" --coverage-clover=coverage.xml
+          else
+            vendor/bin/pest --log-junit "pest-P${{ matrix.php }}-L${LARAVEL_SLUG}.junit.xml"
+          fi
+
+      - name: Upload JUnit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pest-P${{ matrix.php }}-L${{ env.LARAVEL_SLUG }}
+          path: pest-P${{ matrix.php }}-L${{ env.LARAVEL_SLUG }}.junit.xml
+          if-no-files-found: warn
+
+      - name: Upload coverage to Codecov
+        if: matrix.coverage
+        uses: codecov/codecov-action@v6
+        with:
+          files: coverage.xml
+          flags: php
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+      - name: Upload test results to Codecov
+        if: ${{ matrix.coverage && !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  pint:
+    runs-on: ubuntu-latest
+    name: Pint (code style)
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - name: Cache composer packages
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-pint-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-pint-
+      - name: Install
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Run Pint
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            vendor/bin/pint
+          else
+            vendor/bin/pint --test
+          fi
+      - name: Suggest fixes on PR
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: pint
+          fail_level: error
+          level: error
+
+  rector:
+    runs-on: ubuntu-latest
+    name: Rector
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+      - name: Cache composer packages
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-rector-${{ hashFiles('composer.json') }}
+          restore-keys: |
+            composer-rector-
+      - name: Install
+        run: composer install --prefer-dist --no-interaction --no-progress
+      - name: Run Rector
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            vendor/bin/rector process
+          else
+            vendor/bin/rector process --dry-run
+          fi
+      - name: Suggest fixes on PR
+        if: github.event_name == 'pull_request'
+        uses: reviewdog/action-suggester@v1
+        with:
+          tool_name: rector
+          fail_level: error
+          level: error
+
+  dependency-review:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Dependency review
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  commitlint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Commit message lint
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: wagoid/commitlint-github-action@v6
+        with:
+          configFile: .commitlintrc.json
+
+  test-summary:
+    needs: [php]
+    if: always()
+    runs-on: ubuntu-latest
+    name: Test summary
+    permissions:
+      contents: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Download JUnit artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: junit
+          pattern: pest-*
+          merge-multiple: true
+      - name: Publish summary
+        uses: dorny/test-reporter@v3
+        with:
+          name: Pest
+          path: junit/*.xml
+          reporter: phpunit-junit
+          fail-on-error: false

@@ -1,0 +1,82 @@
+{
+    "name": "pentacore/laravel-utils",
+    "description": "A collection of commonly used Laravel utilities, traits, and helpers.",
+    "keywords": [
+        "laravel",
+        "utilities",
+        "traits",
+        "concerns",
+        "enum",
+        "helpers"
+    ],
+    "license": "MIT",
+    "type": "library",
+    "homepage": "https://github.com/pentacore/laravel-utils",
+    "authors": [
+        {
+            "name": "Martin Claesson",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/pentacore/laravel-utils/issues",
+        "source": "https://github.com/pentacore/laravel-utils"
+    },
+    "require": {
+        "php": "^8.3 || ^8.4 || ^8.5",
+        "illuminate/contracts": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/support": "^11.0 || ^12.0 || ^13.0",
+        "illuminate/validation": "^11.0 || ^12.0 || ^13.0"
+    },
+    "require-dev": {
+        "laravel/pint": "^1.18",
+        "orchestra/testbench": "^9.0 || ^10.0 || ^11.0",
+        "pestphp/pest": "^3.0 || ^4.0",
+        "pestphp/pest-plugin-laravel": "^3.0 || ^4.0",
+        "rector/rector": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Pentacore\\LaravelUtils\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Pentacore\\LaravelUtils\\Tests\\": "tests/",
+            "Workbench\\App\\": "workbench/app/",
+            "Workbench\\Database\\Factories\\": "workbench/database/factories/",
+            "Workbench\\Database\\Seeders\\": "workbench/database/seeders/"
+        }
+    },
+    "scripts": {
+        "post-autoload-dump": [
+            "@clear",
+            "@prepare"
+        ],
+        "clear": "@php vendor/bin/testbench package:purge-skeleton --ansi",
+        "prepare": "@php vendor/bin/testbench package:discover --ansi",
+        "build": "@php vendor/bin/testbench workbench:build --ansi",
+        "serve": [
+            "Composer\\Config::disableProcessTimeout",
+            "@build",
+            "@php vendor/bin/testbench serve --ansi"
+        ],
+        "test": "pest",
+        "format": "pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Pentacore\\LaravelUtils\\LaravelUtilsServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
