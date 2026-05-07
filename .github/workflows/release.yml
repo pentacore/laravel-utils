@@ -1,8 +1,8 @@
 name: Release
 
 # Version-only workflow. Runs semantic-release to analyse conventional
-# commits on master, update CHANGELOG.md + package.json / composer.json /
-# Version.php, commit the bump back to master, and push a `v…` tag.
+# commits on main, update CHANGELOG.md + package.json / composer.json /
+# Version.php, commit the bump back to main, and push a `v…` tag.
 # Actual publishing (npm + GitHub Release + Packagist) happens in
 # `publish.yml`, which is triggered by the tag push.
 
@@ -10,7 +10,7 @@ on:
   workflow_run:
     workflows: ['Tests']
     types: [completed]
-    branches: [master]
+    branches: [main]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -30,7 +30,7 @@ jobs:
   release:
     if: >
       github.event_name == 'workflow_dispatch' ||
-      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
