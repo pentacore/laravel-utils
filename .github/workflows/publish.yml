@@ -37,6 +37,9 @@ jobs:
         run: npm install --no-audit --no-fund
 
       - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
         run: |
           # Extract the section of CHANGELOG.md for this tag so the release
           # notes match what semantic-release wrote. If we can't find it,
