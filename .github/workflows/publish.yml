@@ -36,19 +36,7 @@ jobs:
       - name: Install root deps
         run: npm install --no-audit --no-fund
 
-      - name: Build vite plugin
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: npm run build
-
-      - name: Publish npm package (trusted publisher via OIDC)
-        working-directory: packages/vite-plugin-laravel-typefinder
-        run: npm publish --provenance --access public
-
       - name: Create GitHub Release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: |
           # Extract the section of CHANGELOG.md for this tag so the release
           # notes match what semantic-release wrote. If we can't find it,

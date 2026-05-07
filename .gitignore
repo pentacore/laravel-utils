@@ -29,6 +29,7 @@ Homestead.json
 .phpactor.json
 auth.json
 composer.lock
+package-lock.json
 .phpunit.cache
 
 .idea
