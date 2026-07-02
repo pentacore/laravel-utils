@@ -1,3 +1,23 @@
+## [2.0.0](https://github.com/pentacore/laravel-utils/compare/v1.0.3...v2.0.0) (2026-07-02)
+
+### ⚠ BREAKING CHANGES
+
+* Laravel 11 (illuminate ^11.0) is no longer supported.
+The minimum supported version is now Laravel 12. Update to Laravel 12 or
+13 before upgrading this package.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+
+### Features
+
+* drop support for Laravel 11 ([04fca4f](https://github.com/pentacore/laravel-utils/commit/04fca4f83a312f693dfc29c3089289381a44e2e0))
+
+### Dependencies and Other Build Updates
+
+* **deps-dev:** bump @semantic-release/github from 12.0.6 to 12.0.8 ([7f78eca](https://github.com/pentacore/laravel-utils/commit/7f78eca87d49050f18703673eadea992f18ee7b1))
+* **deps-dev:** bump @semantic-release/release-notes-generator ([e661c60](https://github.com/pentacore/laravel-utils/commit/e661c603facc051ddac38b635f0344553e04e4ca))
+* **deps:** bump actions/dependency-review-action from 4 to 5 ([ee18e3c](https://github.com/pentacore/laravel-utils/commit/ee18e3c04b1e17bf16db7752306ef22b0ea980e3))
+
 ## [1.0.3](https://github.com/pentacore/laravel-utils/compare/v1.0.2...v1.0.3) (2026-05-07)
 
 ### Bug Fixes
